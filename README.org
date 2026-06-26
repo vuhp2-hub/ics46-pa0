@@ -1,6 +1,6 @@
 #+title: Readme
 
-The project requirements are located in [[file:reqs/PA 0 - C++ Review - Analyzing Menu Files - Instructions.pdf]]
+The project requirements are located in [[./reqs/PA 0 - C++ Review - Analyzing Menu Files - Instructions.pdf][Instructions]].
 * Attribution
 UCI ICS 46 Course Instructor Bobak Pezeshki, PhD.
 Notes Done by Vu Huy Minh Pham
@@ -8,4 +8,4 @@ Notes Done by Vu Huy Minh Pham
 The pairing table keeps track of dish comibnations and their score.
 The amount of combinations is the amount of dishes of each course times one another.
 
-For example, in the [[file:reqs/PA 0 - C++ Review - Analyzing Menu Files - Instructions.pdf][instruction]] in the .MENU format heading there's an example of three courses. We can expect the score for each dish combination of the courses by multiplication of the number of dishes of each course.
+For example, in the [[./reqs/PA 0 - C++ Review - Analyzing Menu Files - Instructions.pdf][instruction]] in the .MENU format heading there's an example of three courses. We can expect the score for each dish combination of the courses by multiplication of the number of dishes of each course.
