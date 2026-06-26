@@ -164,11 +164,16 @@ class MenuModel {
     ~MenuModel() {
         // TODO: give back the three arrays you allocated (_courses, _factors,
         // _chosen) with delete[].
+        delete[] _courses;
+        delete[] _factors;
+        delete[] _chosen;
     }
 
     MenuModel(MenuModel const &other)
-        : _numCourses(0), _courses(nullptr), _numFactors(0), _factors(nullptr),
-          _numChosen(0), _chosen(nullptr) {
+        : _numCourses(other._numCourses), _courses(new Course[_numCourses]),
+          _numFactors(other._numFactors),
+          _factors(new PairingFactor[_numFactors]),
+          _numChosen(other._numChosen), _chosen(new ChosenCourse[_numChosen]) {
         // TODO: make this a DEEP copy of other (copy _courses, _factors, and
         // _chosen element by
         //       element into freshly-allocated arrays). IMPORTANT: after
@@ -176,7 +181,23 @@ class MenuModel {
         //       _courses, e.g. for each j: _factors[i].setCourse(j,
         //       &_courses[_factors[i].courseAt(j)]); (otherwise the copy's
         //       factors would still point into the other model's Courses).
-        (void)other;
+
+        const Course *other_courses{other._courses};
+        for (int i{0}; i < _numCourses; ++i) {
+            _courses[i].courseIdx = other_courses[i].courseIdx;
+            _courses[i].numDishes = other_courses[i].numDishes;
+        }
+
+        const PairingFactor *other_factors{other._factors};
+        for (int i{0}; i < _numFactors; ++i) {
+            _factors[i] = PairingFactor(other_factors[i]);
+        }
+
+        const ChosenCourse *other_chosen_courses{other._chosen};
+        for (int i{0}; i < _numChosen; ++i) {
+            _chosen[i].courseIdx = other_chosen_courses[i].courseIdx;
+            _chosen[i].dish = other_chosen_courses[i].dish;
+        }
     }
 
     friend void swap(MenuModel &a, MenuModel &b) noexcept {
