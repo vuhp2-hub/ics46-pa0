@@ -1,0 +1,5 @@
+#+title: Readme
+
+The project requirements are located in [[file:reqs/PA 0 - C++ Review - Analyzing Menu Files - Instructions.pdf]]
+* Attribution
+UCI ICS 46 Course Instructor Bobak Pezeshki, PhD.
