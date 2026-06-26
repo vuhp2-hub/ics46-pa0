@@ -1,0 +1,10 @@
+courses: 4
+dishes_per_course: 2 3 3 3
+tables: 7
+table_scopes: (0) (1) (2) (3) (0 1) (1 2) (2 3)
+table_sizes: 2 3 3 3 6 9 9
+largest_table: 9
+complete_meals: 54
+chosen_courses: 2
+chosen: (0 0) (2 1)
+free_courses: 2
