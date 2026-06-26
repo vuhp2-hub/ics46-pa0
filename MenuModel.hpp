@@ -220,7 +220,38 @@ class MenuModel {
         // TODO: open the file; read the count k; allocate _chosen = new
         // ChosenCourse[k];
         //       read k pairs (courseIdx dish) into it; set _numChosen = k.
-        (void)chosenPath;
+
+        // I'm gonna assume I have to handle if _chosen has already been
+        // allocated
+
+        if (chosenPath == "")
+            return;
+        if (_chosen) {
+            delete[] _chosen;
+        }
+
+        std::ifstream in{chosenPath};
+        if (!in.is_open()) {
+            throw std::runtime_error("Invalid ChosenPath");
+        }
+
+        // First should be the number of courses
+        int k;
+        in >> k;
+
+        _numChosen = k;
+        _chosen = new ChosenCourse[k];
+
+        int courseIdx;
+        int dish;
+
+        // I assume that formatting of .chosen is always correct
+        for (int i{0}; in >> courseIdx; ++i) {
+            // They have to be paired up
+            in >> dish;
+            _chosen[i].courseIdx = courseIdx;
+            _chosen[i].dish = dish;
+        }
     }
 
     // --- analyses (used by the driver) ---
