@@ -21,6 +21,7 @@
 #define MENU_MODEL_HPP
 
 #include <fstream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility> // std::swap
@@ -311,7 +312,50 @@ class MenuModel {
         //   SECTION 4 (the pairing scores): for each table read its entry count
         //   then that many
         //      scores (use allocateScores / setScore on _factors[i])
-        (void)menuPath;
+
+        std::ifstream menuFile{menuPath};
+        if (!menuFile.is_open()) {
+            throw std::runtime_error("Invalid menu path");
+        }
+
+        // Ignore "MENU" header
+        std::string ignored;
+        menuFile >> ignored;
+
+        // Extract number of courses
+        menuFile >> _numCourses;
+
+        _courses = new Course[_numCourses];
+        int numDishes;
+
+        // Finishing Section 2
+        for (int i{0}; i < _numCourses; ++i) {
+            menuFile >> numDishes;
+            _courses[i].courseIdx = i;
+            _courses[i].numDishes = numDishes;
+        }
+
+        // Section 3: Pairing tables
+        std::string configLine;
+        menuFile >> _numFactors;
+
+        _factors = new PairingFactor[_numFactors];
+
+        for (int i{0}; i < _numFactors; ++i) {
+            // "1 0" => One course assigned, assign course 0.
+            // "2 1 3" => Two courses assigned, assign course 3.
+            int coursesNum;
+            menuFile >> coursesNum;
+            _factors[i].allocateScope(coursesNum);
+
+            for (int j{0}; j < coursesNum; ++j) {
+                int courseIdx;
+                menuFile >> courseIdx;
+                _factors[i].setCourse(i, &_courses[courseIdx]);
+            }
+        }
+
+        // Section 4: Assigning Scores
     }
 };
 
