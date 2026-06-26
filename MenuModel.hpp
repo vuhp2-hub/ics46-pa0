@@ -261,7 +261,14 @@ class MenuModel {
     long long completeMeals() const {
         // TODO: return the product of every course's dish count
         //       (_courses[0].numDishes * _courses[1].numDishes * ...).
-        return 0;
+
+        long long product{_courses[0].numDishes};
+
+        for (int i{1}; i < _numCourses; ++i) {
+            product *= _courses[i].numDishes;
+        }
+
+        return product;
     }
     int chosenCount() const { return _numChosen; }
     int freeCourses() const { return _numCourses - _numChosen; }
