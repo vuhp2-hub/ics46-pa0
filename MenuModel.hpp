@@ -1,15 +1,17 @@
 // MenuModel.hpp -- YOUR submission for PA 0.  (Header-only.)
 //
-// Build a MenuModel that reads a .menu file (and optionally a .chosen file) and answers a
-// few questions about it. The provided driver.cpp calls the public methods below, so keep
-// their names and signatures exactly as given.
+// Build a MenuModel that reads a .menu file (and optionally a .chosen file) and
+// answers a few questions about it. The provided driver.cpp calls the public
+// methods below, so keep their names and signatures exactly as given.
 //
 // RULES
 //   * Header-only: put everything in this file. Do NOT modify driver.cpp.
-//   * Standard library is allowed ONLY for input: <fstream>, <string>, <stdexcept>, <utility>.
-//   * Store the model's data in raw, dynamically-allocated arrays (new[] / delete[]).
-//     Do NOT use std::vector / std::map / other containers -- this assignment is about
-//     managing memory yourself.
+//   * Standard library is allowed ONLY for input: <fstream>, <string>,
+//   <stdexcept>, <utility>.
+//   * Store the model's data in raw, dynamically-allocated arrays (new[] /
+//   delete[]).
+//     Do NOT use std::vector / std::map / other containers -- this assignment
+//     is about managing memory yourself.
 //   * Private data members use a LEADING underscore (e.g. _scope), as shown.
 //   * Because your classes own raw memory, give them a correct rule of five
 //     (destructor, copy constructor, move constructor, copy/move assignment).
@@ -21,15 +23,17 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
-#include <utility>   // std::swap
+#include <utility> // std::swap
 
-// One course in the menu: its index (its position 0, 1, 2, ...) and how many dishes it offers.
+// One course in the menu: its index (its position 0, 1, 2, ...) and how many
+// dishes it offers.
 struct Course {
     int courseIdx;
     int numDishes;
 };
 
-// One course chosen in advance (read from the .chosen file): which course, which dish.
+// One course chosen in advance (read from the .chosen file): which course,
+// which dish.
 struct ChosenCourse {
     int courseIdx;
     int dish;
@@ -40,52 +44,92 @@ struct ChosenCourse {
 // It OWNS two dynamically-allocated arrays.
 // ---------------------------------------------------------------------------
 class PairingFactor {
-private:
+  private:
     int _scopeSize;
-    Course const** _scope;   // pointers to the courses this table covers (owned by MenuModel)
+    Course const **_scope; // pointers to the courses this table covers (owned
+                           // by MenuModel)
     long long _numEntries;
-    double* _scores;
+    double *_scores;
 
-public:
+  public:
     PairingFactor()
         : _scopeSize(0), _scope(nullptr), _numEntries(0), _scores(nullptr) {}
 
-    // --- two-step construction (the file lists all scopes first, then all score tables) ---
+    // --- two-step construction (the file lists all scopes first, then all
+    // score tables) ---
     void allocateScope(int scopeSize) {
-        // TODO: remember the size in _scopeSize, and allocate _scope = new Course const*[scopeSize].
-        (void)scopeSize;  // remove once you use it
+        // TODO: remember the size in _scopeSize, and allocate _scope = new
+        // Course const*[scopeSize].
+        _scopeSize = scopeSize;
+        _scope = new Course const *[scopeSize];
+        // Scope is the amount of courses the that pairing table covers
     }
-    void setCourse(int index, Course const* course) { _scope[index] = course; }
+    void setCourse(int index, Course const *course) { _scope[index] = course; }
 
     void allocateScores(long long numEntries) {
-        // TODO: remember the size in _numEntries, and allocate _scores = new double[numEntries].
-        (void)numEntries;  // remove once you use it
+        // TODO: remember the size in _numEntries, and allocate _scores = new
+        // double[numEntries].
+        _numEntries = numEntries;
+        _scores = new double[numEntries];
     }
     void setScore(long long index, double score) { _scores[index] = score; }
 
-    // --- rule of five (this object owns the _scope and _scores ARRAYS, not the Courses) ---
+    // --- rule of five (this object owns the _scope and _scores ARRAYS, not the
+    // Courses) ---
     ~PairingFactor() {
-        // TODO: delete[] the two arrays you allocated. (Deleting _scope frees the array of
-        //       pointers only -- the Courses they point at belong to MenuModel, leave them alone.)
+        // TODO: delete[] the two arrays you allocated. (Deleting _scope frees
+        // the array of
+        //       pointers only -- the Courses they point at belong to MenuModel,
+        //       leave them alone.)
+
+        int i{0};
+        double *score = _scores;
+        for (; i < _numEntries; ++i, ++score) {
+            delete score;
+        }
+        delete[] _scores;
     }
 
-    PairingFactor(PairingFactor const& other)
+    PairingFactor(PairingFactor const &other)
         : _scopeSize(0), _scope(nullptr), _numEntries(0), _scores(nullptr) {
-        // TODO: make this a DEEP copy -- allocate our own _scope (an array of Course const*) and
-        //       _scores, then copy each element from other (copy the scope POINTERS as they are;
-        //       MenuModel's copy constructor re-points them into its own Courses).
-        (void)other;
+        // TODO: make this a DEEP copy -- allocate our own _scope (an array of
+        // Course const*) and
+        //       _scores, then copy each element from other (copy the scope
+        //       POINTERS as they are; MenuModel's copy constructor re-points
+        //       them into its own Courses).
+
+        allocateScope(_scopeSize);
+        Course const **other_course{other._scope};
+        for (int i{0}; i < _scopeSize; ++i, ++other_course) {
+            // Note: heap allocated array of heap allocated things.
+            // Dereferencing gives pointer to heap allocated thing.
+            _scope[i] = *other_course;
+        }
+
+        // Deep copy have to be performed for the score list
+        allocateScores(other._numEntries);
+        int i{0};
+        double *score = other._scores;
+        for (; i < _numEntries; ++i, ++score) {
+            _scores[i] = *score;
+        }
     }
 
-    // Provided for you: swap, move constructor, and assignment (the "copy-and-swap" idiom).
-    friend void swap(PairingFactor& a, PairingFactor& b) noexcept {
+    // Provided for you: swap, move constructor, and assignment (the
+    // "copy-and-swap" idiom).
+    friend void swap(PairingFactor &a, PairingFactor &b) noexcept {
         std::swap(a._scopeSize, b._scopeSize);
         std::swap(a._scope, b._scope);
         std::swap(a._numEntries, b._numEntries);
         std::swap(a._scores, b._scores);
     }
-    PairingFactor(PairingFactor&& other) noexcept : PairingFactor() { swap(*this, other); }
-    PairingFactor& operator=(PairingFactor other) { swap(*this, other); return *this; }
+    PairingFactor(PairingFactor &&other) noexcept : PairingFactor() {
+        swap(*this, other);
+    }
+    PairingFactor &operator=(PairingFactor other) {
+        swap(*this, other);
+        return *this;
+    }
 
     // --- read-only accessors (used by the driver) ---
     int scopeSize() const { return _scopeSize; }
@@ -98,42 +142,44 @@ public:
 // The whole menu-design model. It OWNS several dynamically-allocated arrays.
 // ---------------------------------------------------------------------------
 class MenuModel {
-private:
+  private:
     int _numCourses;
-    Course* _courses;       // one Course per course: its index + dish count (length _numCourses)
+    Course *_courses; // one Course per course: its index + dish count (length
+                      // _numCourses)
     int _numFactors;
-    PairingFactor* _factors;
+    PairingFactor *_factors;
     int _numChosen;
-    ChosenCourse* _chosen;
+    ChosenCourse *_chosen;
 
-public:
+  public:
     MenuModel()
-        : _numCourses(0), _courses(nullptr),
-          _numFactors(0), _factors(nullptr),
+        : _numCourses(0), _courses(nullptr), _numFactors(0), _factors(nullptr),
           _numChosen(0), _chosen(nullptr) {}
 
-    explicit MenuModel(std::string const& menuPath) : MenuModel() {
+    explicit MenuModel(std::string const &menuPath) : MenuModel() {
         loadMenu(menuPath);
     }
 
     // --- rule of five ---
     ~MenuModel() {
-        // TODO: give back the three arrays you allocated (_courses, _factors, _chosen) with delete[].
+        // TODO: give back the three arrays you allocated (_courses, _factors,
+        // _chosen) with delete[].
     }
 
-    MenuModel(MenuModel const& other)
-        : _numCourses(0), _courses(nullptr),
-          _numFactors(0), _factors(nullptr),
+    MenuModel(MenuModel const &other)
+        : _numCourses(0), _courses(nullptr), _numFactors(0), _factors(nullptr),
           _numChosen(0), _chosen(nullptr) {
-        // TODO: make this a DEEP copy of other (copy _courses, _factors, and _chosen element by
-        //       element into freshly-allocated arrays). IMPORTANT: after copying a factor, re-point
-        //       its scope into THIS model's _courses, e.g. for each j:
-        //       _factors[i].setCourse(j, &_courses[_factors[i].courseAt(j)]);
-        //       (otherwise the copy's factors would still point into the other model's Courses).
+        // TODO: make this a DEEP copy of other (copy _courses, _factors, and
+        // _chosen element by
+        //       element into freshly-allocated arrays). IMPORTANT: after
+        //       copying a factor, re-point its scope into THIS model's
+        //       _courses, e.g. for each j: _factors[i].setCourse(j,
+        //       &_courses[_factors[i].courseAt(j)]); (otherwise the copy's
+        //       factors would still point into the other model's Courses).
         (void)other;
     }
 
-    friend void swap(MenuModel& a, MenuModel& b) noexcept {
+    friend void swap(MenuModel &a, MenuModel &b) noexcept {
         std::swap(a._numCourses, b._numCourses);
         std::swap(a._courses, b._courses);
         std::swap(a._numFactors, b._numFactors);
@@ -141,12 +187,17 @@ public:
         std::swap(a._numChosen, b._numChosen);
         std::swap(a._chosen, b._chosen);
     }
-    MenuModel(MenuModel&& other) noexcept : MenuModel() { swap(*this, other); }
-    MenuModel& operator=(MenuModel other) { swap(*this, other); return *this; }
+    MenuModel(MenuModel &&other) noexcept : MenuModel() { swap(*this, other); }
+    MenuModel &operator=(MenuModel other) {
+        swap(*this, other);
+        return *this;
+    }
 
-    // Read the .chosen file and RECORD the chosen courses (no other processing needed).
-    void readChosen(std::string const& chosenPath) {
-        // TODO: open the file; read the count k; allocate _chosen = new ChosenCourse[k];
+    // Read the .chosen file and RECORD the chosen courses (no other processing
+    // needed).
+    void readChosen(std::string const &chosenPath) {
+        // TODO: open the file; read the count k; allocate _chosen = new
+        // ChosenCourse[k];
         //       read k pairs (courseIdx dish) into it; set _numChosen = k.
         (void)chosenPath;
     }
@@ -167,32 +218,42 @@ public:
 
     // --- forward iterator over the pairing tables (provided) ---
     class Iterator {
-    public:
-        explicit Iterator(PairingFactor const* ptr) : _ptr(ptr) {}
-        PairingFactor const& operator*() const { return *_ptr; }
-        Iterator& operator++() { ++_ptr; return *this; }
-        bool operator!=(const Iterator& other) const { return _ptr != other._ptr; }
+      public:
+        explicit Iterator(PairingFactor const *ptr) : _ptr(ptr) {}
+        PairingFactor const &operator*() const { return *_ptr; }
+        Iterator &operator++() {
+            ++_ptr;
+            return *this;
+        }
+        bool operator!=(const Iterator &other) const {
+            return _ptr != other._ptr;
+        }
 
-    private:
-        PairingFactor const* _ptr;
+      private:
+        PairingFactor const *_ptr;
     };
     Iterator begin() const { return Iterator(_factors); }
     Iterator end() const { return Iterator(_factors + _numFactors); }
 
-private:
-    void loadMenu(std::string const& menuPath) {
-        // TODO: open menuPath (throw std::runtime_error if it won't open) and read:
+  private:
+    void loadMenu(std::string const &menuPath) {
+        // TODO: open menuPath (throw std::runtime_error if it won't open) and
+        // read:
         //   SECTION 1 (the tag): the word "MENU" -- read it and ignore it
-        //   SECTION 2 (the courses): the number of courses -> _numCourses; allocate
-        //      _courses = new Course[_numCourses]; for each i set _courses[i].courseIdx = i and
-        //      read _courses[i].numDishes
-        //   SECTION 3 (the pairing scopes): the number of tables -> _numFactors; allocate _factors;
-        //      then for each table read its scope size and each course index, pointing the factor at
-        //      the stored Course with setCourse(j, &_courses[idx]) (allocateScope first)
-        //   SECTION 4 (the pairing scores): for each table read its entry count then that many
+        //   SECTION 2 (the courses): the number of courses -> _numCourses;
+        //   allocate
+        //      _courses = new Course[_numCourses]; for each i set
+        //      _courses[i].courseIdx = i and read _courses[i].numDishes
+        //   SECTION 3 (the pairing scopes): the number of tables ->
+        //   _numFactors; allocate _factors;
+        //      then for each table read its scope size and each course index,
+        //      pointing the factor at the stored Course with setCourse(j,
+        //      &_courses[idx]) (allocateScope first)
+        //   SECTION 4 (the pairing scores): for each table read its entry count
+        //   then that many
         //      scores (use allocateScores / setScore on _factors[i])
         (void)menuPath;
     }
 };
 
-#endif  // MENU_MODEL_HPP
+#endif // MENU_MODEL_HPP
