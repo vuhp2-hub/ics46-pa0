@@ -21,7 +21,6 @@
 #define MENU_MODEL_HPP
 
 #include <fstream>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <utility> // std::swap
@@ -89,6 +88,7 @@ class PairingFactor {
             delete score;
         }
         delete[] _scores;
+        delete[] _scope;
     }
 
     PairingFactor(PairingFactor const &other)
@@ -341,6 +341,7 @@ class MenuModel {
 
         _factors = new PairingFactor[_numFactors];
 
+        // The program will let me know how many scores I need
         for (int i{0}; i < _numFactors; ++i) {
             // "1 0" => One course assigned, assign course 0.
             // "2 1 3" => Two courses assigned, assign course 3.
@@ -351,11 +352,19 @@ class MenuModel {
             for (int j{0}; j < coursesNum; ++j) {
                 int courseIdx;
                 menuFile >> courseIdx;
-                _factors[i].setCourse(i, &_courses[courseIdx]);
+                _factors[i].setCourse(j, &_courses[courseIdx]);
             }
         }
 
-        // Section 4: Assigning Scores
+        int numEntries;
+        double score;
+        for (int i{0}; menuFile >> numEntries; ++i) {
+            _factors[i].allocateScores(numEntries);
+            for (int j{0}; j < numEntries; ++j) {
+                menuFile >> score;
+                _factors[i].setScore(j, score);
+            }
+        }
     }
 };
 
