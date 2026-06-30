@@ -82,11 +82,6 @@ class PairingFactor {
         //       pointers only -- the Courses they point at belong to MenuModel,
         //       leave them alone.)
 
-        int i{0};
-        double *score = _scores;
-        for (; i < _numEntries; ++i, ++score) {
-            delete score;
-        }
         delete[] _scores;
         delete[] _scope;
     }
@@ -167,7 +162,10 @@ class MenuModel {
         // _chosen) with delete[].
         delete[] _courses;
         delete[] _factors;
-        delete[] _chosen;
+        // Because _chosen is optional
+        if (_chosen) {
+            delete[] _chosen;
+        }
     }
 
     MenuModel(MenuModel const &other)
